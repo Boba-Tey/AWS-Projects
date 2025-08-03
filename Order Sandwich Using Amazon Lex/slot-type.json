@@ -1,0 +1,26 @@
+[
+    {
+        "sampleValue": {"value": "Grill Cheese Sandwich"},
+        "synonyms": [
+            {"value": "Grill Cheese"},
+            {"value": "Cheese"}
+        ]
+    },
+
+    {
+        "sampleValue": {"value": "Breakfast Sandwich"},
+        "synonyms": [
+            {"value": "Breakfast"},
+            {"value": "Sunny"}
+        ]
+    },
+
+    {
+        "sampleValue": {"value": "Vegetable Sandwich"},
+        "synonyms": [
+            {"value": "Vegetable"},
+            {"value": "Veggie"},
+            {"value": "Vegetarian"}
+        ]
+    }
+]

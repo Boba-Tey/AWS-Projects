@@ -1,0 +1,51 @@
+{
+    "valueElicitationSetting": {
+        "slotConstraint": "Required",
+        "promptSpecification": {
+            "messageGroups": [
+                {
+                    "message": {
+                        "plainTextMessage": {
+                            "value": "What would you like to order? We got: Grilled Cheese, Breakfast and Vegetable Sandwich"
+                        }
+                    }
+                }
+            ],
+            "maxRetries": 0,
+            "allowInterrupt": true
+        },
+
+        "slotCaptureSetting": {
+            "captureResponse": {
+                "messageGroups": [
+                    {
+                        "message": { "plainTextMessage": {"value": "Good choice!"} },
+                        "variations": [
+                            { "plainTextMessage": {"value": "Got it"} }
+                        ]
+                    }
+                ]
+            },
+
+            "captureNextStep": {
+                "dialogAction": {"type": "ConfirmIntent"}
+            },
+
+            "failureResponse": {
+                "messageGroups": [
+                    {
+                        "message": { "plainTextMessage": {"value": "Sorry, that's not on the menu"} }
+                    }
+                ]
+            },
+
+            "failureNextStep": {
+                "dialogAction": {
+                    "type": "ElicitSlot",
+                    "slotToElicit": "sandwich"
+                }
+            }
+        }
+
+    }
+}

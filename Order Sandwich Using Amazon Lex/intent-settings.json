@@ -1,0 +1,101 @@
+{
+  "sampleUtterances": [
+    {"utterance": "Hi"},
+    {"utterance": "Hello"},
+    {"utterance": "Hey"},
+    {"utterance": "I would like to order"}
+  ],
+
+  "initialResponseSetting": {
+    "initialResponse": {
+      "messageGroups": [
+        {
+          "message": {
+            "plainTextMessage": {"value": "Welcome!"}
+          },
+          "variations": [
+            { "plainTextMessage": {"value": "Hey there!"} }
+          ]
+        }
+      ],
+      "allowInterrupt": true
+    }
+  },
+
+  "intentConfirmationSetting": {
+    "promptSpecification": {
+      "messageGroups": [
+        {
+          "message": {
+            "imageResponseCard": {
+              "title": "Confirm your order of one {sandwich}?",
+              "imageUrl": "https://sandwitch-bot-images.s3-ap-southeast-1.amazonaws.com/bread.jpg",
+              "buttons": [
+                {"text": "Yes", "value": "Confirm"},
+                {"text": "No", "value": "Decline"}
+              ]
+            }
+          }
+        }
+      ],
+      "maxRetries": 0,
+      "allowInterrupt": true
+    },
+
+    "confirmationResponse": {
+      "messageGroups": [
+        {
+          "message": {
+            "plainTextMessage": {"value": "Your order has been confirmed! \nType: 'Where is my order?' to get it's status"}
+          }
+        }
+      ]
+    },
+
+    "declinationResponse": {
+      "messageGroups": [
+        {
+          "message": {
+            "plainTextMessage": {"value": "That's alright, you can order again later"}
+          }
+        }
+      ]
+    },
+
+    "failureResponse": {
+      "messageGroups": [
+        {
+          "message": {
+            "plainTextMessage": {"value": "Sorry couldn't catch that, please try again"}
+          }
+        }
+      ]
+    }
+  },
+
+  "intentClosingSetting": {
+    "closingResponse": {
+      "messageGroups": [
+        {
+          "message": {
+            "plainTextMessage": {
+              "value": "Type 'Where is my sandwich' to know your order status"
+            }
+          }
+        }
+      ],
+      "allowInterrupt": true
+    }
+  },
+
+  "slotPriorities": [
+    {
+      "priority": 1,
+      "slotId": "SLOT ID"
+    }
+  ],
+
+  "fulfillmentCodeHook": {
+    "enabled": true
+  }
+}
