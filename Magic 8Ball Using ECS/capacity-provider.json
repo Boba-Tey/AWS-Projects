@@ -1,0 +1,12 @@
+{
+    "name": "ec2-capacity-provider",
+    "autoScalingGroupProvider": {
+        "autoScalingGroupArn": "ARN",
+        "managedScaling": {
+            "status": "ENABLED",
+            "targetCapacity": 75,
+            "instanceWarmupPeriod": 300
+        },
+        "managedTerminationProtection": "ENABLED"
+    }
+}

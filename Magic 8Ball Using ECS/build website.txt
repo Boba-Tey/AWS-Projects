@@ -1,0 +1,2 @@
+docker build -t magic-8ball-website .
+docker run --name 8ball-website -p 8080:80 magic-8ball-website

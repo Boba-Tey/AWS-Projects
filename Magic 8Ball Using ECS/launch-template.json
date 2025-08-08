@@ -1,0 +1,20 @@
+{
+    "LaunchTemplateName": "ecs-launch-template",
+    "LaunchTemplateData": {
+        "ImageId": "ami-0aea396aacb36038f",  
+        "InstanceType": "t2.micro",  
+        "SecurityGroupIds": ["sg-029d2eb0abec8f192"],
+        "IamInstanceProfile": {"Name": "ecs-instance-profile"},
+        "UserData": "IyEvYmluL2Jhc2gNCmVjaG8gRUNTX0NMVVNURVI9bWFnaWMtOGJhbGwtY2x1c3RlciA+PiAvZXRjL2Vjcy9lY3MuY29uZmln",
+        "BlockDeviceMappings": [
+            {
+                "DeviceName": "/dev/xvda",
+                "Ebs": {
+                    "DeleteOnTermination": true,
+                    "VolumeSize": 30,
+                    "VolumeType": "gp2"
+                }  
+            }
+        ]
+    }
+}

@@ -1,0 +1,28 @@
+body {
+    background-image: url("images/wood.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.container {
+	border: 5px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    text-align: center;
+    font-size: 25px;
+    color: white;
+}
+
+.container input {
+    font-size: 20px;
+    width: 200px;
+}
+
+.container button {
+    font-size: 15px;
+}
