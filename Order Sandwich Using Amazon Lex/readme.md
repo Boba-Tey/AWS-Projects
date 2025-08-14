@@ -1,7 +1,5 @@
 # Read The Project Documentation Here: 
-```
  https://www.notion.so/Order-Sandwich-Using-Amazon-Lex-243c2435032280708b3dea6bd8acca32?source=copy_link
-```
 
 # Variables 
 ```bash
@@ -184,3 +182,4 @@ aws lexv2-models build-bot-locale \
 echo "Built $BOT_NAME"
 
 ```
+
