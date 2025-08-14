@@ -1,3 +1,5 @@
+# Read about the project in detail here: https://www.notion.so/AI-Email-Newsletter-With-Flask-21dc243503228000ad13f169626074df
+
 # Add these variables to your bash file
 ```bash
 #!/bin/bash
