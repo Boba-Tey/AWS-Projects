@@ -1,7 +1,5 @@
 # Read The Project Documentation Here: 
-```
  https://www.notion.so/Magic-8-ball-Website-using-ECS-249c24350322803ba101c88609c19d1c?source=copy_link
-```
 
 # Setup
 ```bash
@@ -134,3 +132,4 @@ aws ecs create-service \
 echo "Created new Service"
 
 ```
+
