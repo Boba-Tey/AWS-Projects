@@ -1,4 +1,4 @@
-# Read about the project in detail here: 
+# Read The Project Documentation Here: 
 ```
 https://www.notion.so/AI-Email-Newsletter-With-Flask-21dc243503228000ad13f169626074df
 ```
