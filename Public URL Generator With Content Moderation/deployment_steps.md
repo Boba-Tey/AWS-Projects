@@ -1,3 +1,6 @@
+# Read The Project Documentation Here: 
+https://www.notion.so/Public-URL-Generator-With-Content-Moderation-225c24350322805891e2f5330c63e5dc?source=copy_link
+
 # The variables
 ```bash
 REGION_CODE=ap-south-1
@@ -84,4 +87,5 @@ aws s3api put-bucket-policy \
 
 aws s3 cp ./webpage s3://$WEB_BUCKET/ --recursive
 echo "Webpage created, link: http://$WEB_BUCKET.s3-website.$REGION_CODE.amazonaws.com/"
+
 ```
