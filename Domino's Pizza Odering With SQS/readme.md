@@ -1,7 +1,5 @@
 # Read The Project Documentation Here: 
-```
  https://www.notion.so/Domino-s-Pizza-Ordering-With-SQS-230c24350322809bb497cb70834a911d?source=copy_link
-```
 
 # Variables And Setup
 ```bash
@@ -91,3 +89,4 @@ aws elasticbeanstalk create-environment \
 echo "Elastic beanstalk is in progress..."
 
 ```
+
