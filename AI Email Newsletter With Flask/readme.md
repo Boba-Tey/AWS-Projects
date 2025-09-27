@@ -1,7 +1,45 @@
-# Read The Project Documentation Here: 
-https://www.notion.so/AI-Email-Newsletter-With-Flask-21dc243503228000ad13f169626074df
+# 🤖 AI-Generated Astronomy Newsletter: Serverless Cloud Automation with Lambda and Eventbridge
 
-# Add these variables to your bash file
+### Goal of this project:
+- Allow users to subscribe and receive AI generated astronomy fun facts via email along with an option to cancel their subscription.
+- Automate sending new emails based on a given time schedule
+- Create a microservice architecture where each component functions independently
+
+#
+### The Contents:
+- A frontend flask web app hosted on Elastic Beanstalk prompts the user to enter their email for subscribing to the astronomy newsletter.
+
+<img width="1000" alt="1" src="https://github.com/user-attachments/assets/34ce2f45-1ef8-4abb-8538-4bb326f57cfa" />
+
+- Once subscribed a POST request is sent to the backend code stored in AWS Lambda Communication between EB and Lambda is done through REST API. If the user is successfully registered, a confirmation page is displayed.
+
+<img width="1000" alt="2" src="https://github.com/user-attachments/assets/31a99e22-0b5d-4e14-bbcc-61420a8a6d06" />
+
+- The lambda function was written in python and contains modules such as:
+> -  Boto 3: Interacts with AWS services programmatically in python
+> - Gemini AI: Generates the newsletter’s content
+> - Yagmail: Mails the  newsletter from the list of emails
+- The user's email is saved to a Dynamo DB table with the primary key being their email while the sort key is their uniquely generated token (this comes in handy during cancellation)
+
+<img width="1000" alt="3" src="https://github.com/user-attachments/assets/75141e92-def4-4781-88c5-acc653da48aa" />
+
+- Gemini AI generates an astronomy related fun fact and the content is then sent to all the subscribed users via Yagmail.
+
+<img width="1024" height="248" alt="4" src="https://github.com/user-attachments/assets/230335a4-27db-4be4-a5d9-154c2dde4748" />
+
+- Event Bridge is then used to invoke the lambda function at the given interval. this way the users can get new emails every day or every week.
+
+<img width="1000" alt="5" src="https://github.com/user-attachments/assets/3b5309f0-78bd-40bb-9349-efc149d87d9a" />
+
+- If a user wishes to no longer receive any new emails, they can click the link below the email to unsubscribe (as seen in the previous image) Only the user is sent their unique token which is required for opting out of the newsletter, this ensures nobody else can trigger a cancellation with the user’s email alone. After successfully unsubscribing a cancellation page is displayed.
+
+<img width="1000" alt="6" src="https://github.com/user-attachments/assets/1ff4e9ef-ee6c-473f-ac45-f189772cc6b7" />
+
+#
+### Project’s Architecture:
+<img width="500" src="https://github.com/user-attachments/assets/e3b4c032-6ce2-41c2-a9a4-63457229f240" />
+
+# [Follow Along] Add these variables to your bash file
 ```bash
 #!/bin/bash
 set -e
