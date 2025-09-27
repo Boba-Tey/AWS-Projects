@@ -1,7 +1,54 @@
-# Read The Project Documentation Here: 
- https://www.notion.so/Order-Sandwich-Using-Amazon-Lex-243c2435032280708b3dea6bd8acca32?source=copy_link
+# 😋 Serverless ordering and tracking chatbot using Amazon Lex, Lambda, DynamoDB and S3
 
-# Variables 
+### Goal of this project:
+- Create a chatbot with Amazon Lex
+- Reply to user queries using intents, slots and sample utterances
+- DynamoDB for storing Order IDs
+- Lambda for order, image mapping and querying Dynamo DB
+- S3 for storing order images
+
+#
+### The Contents:
+- Initiate conversation with the chatbot using a sample utterance (like hi, hello, hey)
+- This triggers the ordering intent
+- Amazon Lex then asks the user their order, for this a custom slot type was used and keywords (like cheese, grill cheese) were tagged to the menu item “Grill Cheese sandwich”
+- After noting, the bot sends a confirmation card asking the user if it should place the order?
+
+<img height="513" alt="1" src="https://github.com/user-attachments/assets/361513ca-4fbd-48f2-baa1-807d94e02d9b" />
+&nbsp;
+<img height="513" alt="2" src="https://github.com/user-attachments/assets/b1af0630-2b2a-4aba-8e6e-21941a969b5e" />
+
+- If the user confirms their order, Lambda generates an order ID and saves it to DynamoDB. Lex then informs the user about the order being placed and the keyword/utterance to use for tracking their order
+- However if the user denies to place an order, Lex ceases the ordering processing
+
+<img height="253" alt="3" src="https://github.com/user-attachments/assets/2d7a3f88-cbf2-4321-a423-7e9fbfa9f50a" />
+&nbsp;
+<img height="142" alt="4" src="https://github.com/user-attachments/assets/66d11ff5-2be8-4d62-835f-31ce0fe1ad32" />
+
+- Here in the tracking intent, the user says a variant of the utterance “Where is my order?”
+- Lex then prompts the user for their order ID
+
+<img height="169" alt="5" src="https://github.com/user-attachments/assets/e04caa47-20c1-46ac-9019-76832087c6ee" />
+
+- Lambda will query DynamoDb and check if the order ID provided is correct, the bot will then mention the order name and show a progress image (which is stored in an S3 bucket)
+- The image varies based on which sandwich was ordered.
+
+<img height="510" alt="6" src="https://github.com/user-attachments/assets/a146a9fb-4bd3-4371-a65b-9d0eda7481d6" />
+&nbsp;
+<img height="510" alt="7" src="https://github.com/user-attachments/assets/b97ae101-a766-4a9a-8d35-0726c4b772c9" />
+
+- If the user says a wrong order id or utterance, the fallback intent will be triggered
+
+<img height="242" alt="8" src="https://github.com/user-attachments/assets/0c70cd17-3a15-42b3-a39b-41f765b09b9f" />
+&nbsp;
+<img height="141" alt="9" src="https://github.com/user-attachments/assets/82d1f451-02b5-4c95-8a90-810b9b3ab95d" />
+
+#
+### Project’s Architecture:
+
+![diagram](https://github.com/user-attachments/assets/897a2bc6-fdab-48a0-8868-6d0fd13210bd)
+
+# [Follow Along] Variables 
 ```bash
 #!/bin/bash
 set -e
@@ -182,4 +229,5 @@ aws lexv2-models build-bot-locale \
 echo "Built $BOT_NAME"
 
 ```
+
 
