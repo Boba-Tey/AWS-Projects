@@ -1,7 +1,32 @@
-# Read The Project Documentation Here: 
- https://www.notion.so/Magic-8-ball-Website-using-ECS-249c24350322803ba101c88609c19d1c?source=copy_link
+# 📦 Hosting a simple Magic 8 Ball website using Elastic Container Service (with the EC2 method)
 
-# Setup
+### Goal of this project:
+
+- Build a docker image with the website’s content and expose port 80
+- Upload the docker image to ECR and use ECS to run the container
+
+#
+### The Contents:
+- You can ask questions to the magic 8 ball and it will give it’s advice
+- To get started, copy your website’s content into the command and build the docker image, Remember to expose port 80 as well.
+- Push your docker image to Elastic Container Registry
+- Create a Task Definition, then the ECS Cluster
+- To run your container with EC2, you’ll also need to create an ASG and ALB
+- Make sure to attach the correct roles, instance profiles and capacity providers. These settings are **vital** or else your container might not run as intended
+- Finally, create a new service and access the website using the ALB’s DNS
+
+![magib 8 ball demo](https://github.com/user-attachments/assets/f42c77b3-21d2-4b90-9bb4-f1778569a82b)
+
+- The site supports differnt screen types!
+
+<img height="600" src="https://github.com/user-attachments/assets/e42eab3a-76e6-4f0e-892c-04d8dedf6177" />
+
+#
+### Project’s Architecture:
+
+![diagram](https://github.com/user-attachments/assets/7376edee-57e7-4600-ba65-b39bf9b0e9f7)
+
+# [Follow Along] Setup
 ```bash
 #!/bin/bash
 set -e
@@ -132,4 +157,5 @@ aws ecs create-service \
 echo "Created new Service"
 
 ```
+
 
