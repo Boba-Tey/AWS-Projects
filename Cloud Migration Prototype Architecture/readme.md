@@ -1,5 +1,5 @@
 # 🏗️ Cloud Migration Prototype Architecture Using CloudFormation
-This prototype was developed to accelerate our ongoing cloud migration initiative. It demonstrates automated and repeatable infrastructure deployment on AWS using CloudFormation.
+This prototype was developed to accelerate my company's ongoing cloud migration initiative. It demonstrates automated and repeatable infrastructure deployment on AWS using CloudFormation.
 
 The template provisions a foundational, highly-available, and secure network infrastructure:
 - **VPC & Availability:** A Virtual Private Cloud (VPC) spanning two Availability Zones (AZs), each AZ includes dedicated Public and Private Subnets.
