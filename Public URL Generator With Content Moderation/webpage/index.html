@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Custom Image URL</title>
+        <link rel="stylesheet" href= "style.css">
+    </head>
+    <body>
+        <div class="main">
+            <h2><label for="avatar">Choose An Image:</label></h2>
+            <p><button onclick="select_img()">Browse</button>
+            <input type="file" id="avatar" accept="image/png, image/jpeg"/></p>
+            <button style="cursor: pointer;" onclick="upload_img()">Upload File</button>
+            <p><a href="url" target="_blank" id="img_link"></a></p>
+            <img id="img_preview">
+            <p id="img_para"></p>  
+        </div>
+
+    <script src="script.js"></script>
+    </body>
+</html>
