@@ -1,4 +1,4 @@
-# 📸 Static webhosting, URL generation, content moderation using S3, Lambda & AWS Rekognition
+# 📸 [IAC made in Terraform] Static webhosting, URL generation, content moderation using S3, Lambda & AWS Rekognition
 
 ### Goal of this project:
 - Host a static website on S3 and allow users to upload their images
