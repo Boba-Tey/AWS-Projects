@@ -1,4 +1,4 @@
-# Cloud Migration Prototype Architecture Using CloudFormation
+# 🏗️ Cloud Migration Prototype Architecture (AWS CloudFormation)
 This prototype was developed to accelerate our ongoing cloud migration initiative. It demonstrates automated and repeatable infrastructure deployment on AWS using CloudFormation.
 
 The template provisions a foundational, highly-available, and secure network infrastructure:
