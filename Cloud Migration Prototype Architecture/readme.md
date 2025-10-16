@@ -4,7 +4,7 @@ This prototype was developed to accelerate our ongoing cloud migration initiativ
 The template provisions a foundational, highly-available, and secure network infrastructure:
 - **VPC & Availability:** A Virtual Private Cloud (VPC) spanning two Availability Zones (AZs). Each AZ includes dedicated Public and Private Subnets.
   
-- **Internet Egress:** An Internet Gateway (IGW) provides direct internet access to the Public Subnets. Two redundant NAT Gateways (one per Public Subnet) ensure the Private Subnets have secure, outbound-only internet connectivity for updates, patching, and repository access.
+- **Internet Egress:** An Internet Gateway (IGW) provides direct internet access to the Public Subnets. Two redundant NAT Gateways (one per Public Subnet) ensures the Private Subnets have secure, outbound-only internet connectivity for updates, patching, and repository access.
   
 - **High Availability & Scaling:**
   - **Application Load Balancers (ALBs)** are deployed in both the Public and Private tiers to evenly distribute traffic.
