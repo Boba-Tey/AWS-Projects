@@ -1,0 +1,297 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+    # VPC
+    VPCSetup:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            Tags:
+                - Key: Name
+                  Value: SampleVPC
+
+    # Subnets in AZ-1
+    PublicSubnet1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPCSetup
+            CidrBlock: 10.0.0.0/24
+            AvailabilityZone: ap-south-1a
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: PublicSubnet1
+
+    PrivateSubnet1:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPCSetup
+            CidrBlock: 10.0.1.0/24
+            AvailabilityZone: ap-south-1a
+            Tags:
+                - Key: Name
+                  Value: PrivateSubnet1
+
+    # Subnets in AZ-2
+    PublicSubnet2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPCSetup
+            CidrBlock: 10.0.2.0/24
+            AvailabilityZone: ap-south-1b
+            MapPublicIpOnLaunch: true
+            Tags:
+                - Key: Name
+                  Value: PublicSubnet2
+
+    PrivateSubnet2:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPCSetup
+            CidrBlock: 10.0.3.0/24
+            AvailabilityZone: ap-south-1b
+            Tags:
+                - Key: Name
+                  Value: PrivateSubnet2
+
+    # Internet Gateway
+    InternetGatewaySetup:
+        Type: AWS::EC2::InternetGateway
+        Properties:
+            Tags:
+                - Key: Name
+                  Value: SampleIGW
+
+    AttachIGW:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId: !Ref VPCSetup
+            InternetGatewayId: !Ref InternetGatewaySetup
+
+    # NAT Gateway in PublicSubnet1
+    NatEIP1:
+        Type: AWS::EC2::EIP
+        Properties:
+            Domain: vpc
+
+    NatGateway1:
+        Type: AWS::EC2::NatGateway
+        Properties:
+            AllocationId: !GetAtt NatEIP1.AllocationId
+            SubnetId: !Ref PublicSubnet1
+            Tags:
+                - Key: Name
+                  Value: NATGateway1
+
+    # NAT Gateway in PublicSubnet2
+    NatEIP2:
+        Type: AWS::EC2::EIP
+        Properties:
+            Domain: vpc
+
+    NatGateway2:
+        Type: AWS::EC2::NatGateway
+        Properties:
+            AllocationId: !GetAtt NatEIP2.AllocationId
+            SubnetId: !Ref PublicSubnet2
+            Tags:
+                - Key: Name
+                  Value: NATGateway2
+
+    # Public Route Table
+    PublicRouteTableSetup:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPCSetup
+            Tags:
+                - Key: Name
+                  Value: PublicRouteTable
+
+    PublicRoute:
+        Type: AWS::EC2::Route
+        DependsOn: AttachIGW
+        Properties:
+            RouteTableId: !Ref PublicRouteTableSetup
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGatewaySetup
+
+    PublicSubnet1RouteTableAssociate:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnet1
+            RouteTableId: !Ref PublicRouteTableSetup
+
+    PublicSubnet2RouteTableAssociate:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnet2
+            RouteTableId: !Ref PublicRouteTableSetup
+
+    # Private Route Table AZ-1
+    PrivateRouteTable1:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPCSetup
+            Tags:
+                - Key: Name
+                  Value: PrivateRouteTable1
+
+    PrivateRoute1:
+        Type: AWS::EC2::Route
+        DependsOn: NatGateway1
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable1
+            DestinationCidrBlock: 0.0.0.0/0
+            NatGatewayId: !Ref NatGateway1
+
+    PrivateSubnet1RouteTableAssociate:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnet1
+            RouteTableId: !Ref PrivateRouteTable1
+
+    # Private Route Table AZ-2
+    PrivateRouteTable2:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPCSetup
+            Tags:
+                - Key: Name
+                  Value: PrivateRouteTable2
+
+    PrivateRoute2:
+        Type: AWS::EC2::Route
+        DependsOn: NatGateway2
+        Properties:
+            RouteTableId: !Ref PrivateRouteTable2
+            DestinationCidrBlock: 0.0.0.0/0
+            NatGatewayId: !Ref NatGateway2
+
+    PrivateSubnet2RouteTableAssociate:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnet2
+            RouteTableId: !Ref PrivateRouteTable2
+
+    # Security Groups
+    PublicSG:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow HTTP from internet
+            VpcId: !Ref VPCSetup
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                  CidrIp: 0.0.0.0/0
+
+    PrivateSG:
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: Allow HTTP from public SG
+            VpcId: !Ref VPCSetup
+            SecurityGroupIngress:
+                - IpProtocol: tcp
+                  FromPort: 80
+                  ToPort: 80
+                  SourceSecurityGroupId: !Ref PublicSG
+
+    # Public ALB + ASG
+    PublicALB:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties:
+            Subnets:
+                - !Ref PublicSubnet1
+                - !Ref PublicSubnet2
+            SecurityGroups: [!Ref PublicSG]
+
+    PublicTG:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        Properties:
+            VpcId: !Ref VPCSetup
+            Port: 80
+            Protocol: HTTP
+            TargetType: instance
+
+    PublicListener:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            LoadBalancerArn: !Ref PublicALB
+            Port: 80
+            Protocol: HTTP
+            DefaultActions:
+                - Type: forward
+                  TargetGroupArn: !Ref PublicTG
+
+    PublicLaunchTemplate:
+        Type: AWS::EC2::LaunchTemplate
+        Properties:
+            LaunchTemplateData:
+                ImageId: ami-0e306788ff2473ccb 
+                InstanceType: t2.micro
+                SecurityGroupIds: [!Ref PublicSG]
+
+    PublicASG:
+        Type: AWS::AutoScaling::AutoScalingGroup
+        Properties:
+            VPCZoneIdentifier:
+                - !Ref PublicSubnet1
+                - !Ref PublicSubnet2
+            LaunchTemplate:
+                LaunchTemplateId: !Ref PublicLaunchTemplate
+                Version: !GetAtt PublicLaunchTemplate.LatestVersionNumber
+            MinSize: 2
+            MaxSize: 2
+            DesiredCapacity: 2
+            TargetGroupARNs: [!Ref PublicTG]
+
+    # Private ALB + ASG
+    PrivateALB:
+        Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+        Properties:
+            Scheme: internal
+            Subnets:
+                - !Ref PrivateSubnet1
+                - !Ref PrivateSubnet2
+            SecurityGroups: [!Ref PrivateSG]
+
+    PrivateTG:
+        Type: AWS::ElasticLoadBalancingV2::TargetGroup
+        Properties:
+            VpcId: !Ref VPCSetup
+            Port: 80
+            Protocol: HTTP
+            TargetType: instance
+
+    PrivateListener:
+        Type: AWS::ElasticLoadBalancingV2::Listener
+        Properties:
+            LoadBalancerArn: !Ref PrivateALB
+            Port: 80
+            Protocol: HTTP
+            DefaultActions:
+                - Type: forward
+                  TargetGroupArn: !Ref PrivateTG
+
+    PrivateLaunchTemplate:
+        Type: AWS::EC2::LaunchTemplate
+        Properties:
+            LaunchTemplateData:
+                ImageId: ami-0e306788ff2473ccb
+                InstanceType: t2.micro
+                SecurityGroupIds: [!Ref PrivateSG]
+
+    PrivateASG:
+        Type: AWS::AutoScaling::AutoScalingGroup
+        Properties:
+            VPCZoneIdentifier:
+                - !Ref PrivateSubnet1
+                - !Ref PrivateSubnet2
+            LaunchTemplate:
+                LaunchTemplateId: !Ref PrivateLaunchTemplate
+                Version: !GetAtt PrivateLaunchTemplate.LatestVersionNumber
+            MinSize: 2
+            MaxSize: 2
+            DesiredCapacity: 2
+            TargetGroupARNs: [!Ref PrivateTG]
