@@ -18,20 +18,20 @@
 ## Walkthrough
 
 ### 1) After an image is submitted and passes verification, the user receives a public link
-<img src="Project Images/1.png" width="80%">
+<img src="Project Images/1.png">
 
 ### 2) Outcome when an image fails content verification
-<img src="Project Images/2.png" width="80%">
+<img src="Project Images/2.png">
 
 ### 3) Outcome when an image size exceeds 2 MB (Validated on both frontend and backend)
-<img src="Project Images/3.png" width="80%">
+<img src="Project Images/3.png">
 
 ### 4) Outcome when an image format is unsupported (Validated on both frontend and backend)
-<img src="Project Images/4.png" width="80%">
+<img src="Project Images/4.png">
 
 
 ## Architecture Diagram
-<img src="Project Images/diagram.jpg" width="80%">
+<img src="Project Images/diagram.jpg">
 
 ## Setup And Deployment Note
 > *Feel free to clone this repository and customize the variable values to match your requirements.*
