@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+    
+    environment {
+        AWS_DEFAULT_REGION = "your-aws-region"
+        AWS_DEFAULT_OUTPUT = "json" // or yaml
+    }
+
+    stages {
+        stage("Delete Cloud Infrastructure") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: "aws-cred", passwordVariable: "AWS_SECRET_ACCESS_KEY", usernameVariable: "AWS_ACCESS_KEY_ID")]) {
+                    powershell '''
+                        aws s3api head-bucket --bucket astronomy-news-sample 2>$null
+
+                        if ($LASTEXITCODE -eq 0) {
+                            aws s3 rm s3://astronomy-news-sample --recursive
+                            aws cloudformation delete-stack --stack-name test-stack
+                            aws cloudformation wait stack-delete-complete --stack-name test-stack
+                        
+                        } else { 
+                            Write-Host "Bucket doesn't exist or you don't have access, attempting to remove cloudformation stack" 
+                            aws cloudformation delete-stack --stack-name test-stack
+                            aws cloudformation wait stack-delete-complete --stack-name test-stack
+                        }
+                    '''
+                }
+            }
+        }
+    }
+}

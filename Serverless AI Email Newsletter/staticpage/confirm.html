@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Fun facts!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="intro">
+        <h2>Thank you!</h2>
+        <p id="user_email"></p>
+        <a href="index.html"> <button>Back</button> </a>
+    </div>
+    
+    <script>
+        const params = new URLSearchParams(document.location.search);
+        const url_email = params.get("email");
+        const url_verified = params.get("verified");
+
+        if (url_email) {
+            document.querySelector("#user_email").innerHTML = 
+            `Email: <b>${url_email}</b> has been sent the registration confirmation. 
+            Please check your inbox or the spam folder to comfirm your registration`;
+
+        } else if (url_verified) {
+            document.querySelector("#user_email").innerHTML = "Your email has been verified!";
+
+        } else document.querySelector("#user_email").innerHTML = "It's blank";
+    </script>
+    
+</body>
+</html>

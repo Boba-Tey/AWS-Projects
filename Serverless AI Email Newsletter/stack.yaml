@@ -1,0 +1,349 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  Email:
+    Type: String
+    NoEcho: true
+    Description: Email ID
+
+  Password:
+    Type: String
+    NoEcho: true
+    Description: Password For Email
+
+  GroqKey:
+    Type: String
+    NoEcho: true
+    Description: API Key For Groq AI
+
+Resources:
+  # S3 Bucket
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: astronomy-news-sample
+      
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+  # Bucket Policy
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+
+      PolicyDocument:
+        Id: Web_Bucket
+        Version: 2012-10-17
+
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub ${S3Bucket.Arn}/*
+
+  # DSQL Cluster
+  DSQLCluster:
+    Type: AWS::DSQL::Cluster
+    Properties:
+      DeletionProtectionEnabled: false
+
+  # Lambda Role
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+
+            Principal: 
+              Service: 
+                lambda.amazonaws.com
+
+            Action: sts:AssumeRole
+
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+      Policies:
+        - PolicyName: DSQL_Login
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: dsql:DbConnectAdmin
+                Resource: !GetAtt DSQLCluster.ResourceArn
+  
+  # Lambda Function
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: astronomy-app
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: python3.14
+      Handler: lambda_function.lambda_handler
+      Timeout: 30
+
+      Code: 
+        S3Bucket: bucket-name
+        S3Key: lambda_function.zip
+
+      Environment:
+        Variables:
+          SENDER: !Ref Email
+          PASSWORD: !Ref Password
+          APIKEY: !Ref GroqKey
+          
+          WEBSITEURL: !GetAtt S3Bucket.WebsiteURL
+          APIBASEURL: !Sub https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/Prod
+          DSQLENDPOINT: !Sub ${DSQLCluster}.dsql.${AWS::Region}.on.aws
+
+  # Api Gateway
+  APIGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: astronomy-api
+
+  # Request Validator
+  RequestValidator:
+    Type: AWS::ApiGateway::RequestValidator
+    Properties:
+      Name: BodyValidator
+      RestApiId: !Ref APIGateway
+      ValidateRequestBody: true
+      ValidateRequestParameters: true
+      
+  # Resource for /register
+  RegisterResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref APIGateway
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: register
+
+  # Register Model
+  RegisterModel:
+    Type: AWS::ApiGateway::Model
+    Properties:
+      RestApiId: !Ref APIGateway
+      ContentType: application/json
+
+      Schema: 
+        $schema: http://json-schema.org/draft-04/schema#
+        type: object
+
+        properties:
+          create_email:
+            type: string
+
+        required: 
+          - create_email
+
+  # Register CORS
+  RegisterCORS:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref RegisterResource
+      RestApiId: !Ref APIGateway
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: Empty
+
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Methods: false
+
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type'"
+              method.response.header.Access-Control-Allow-Origin: !Sub "'${S3Bucket.WebsiteURL}'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST,DELETE'"
+
+  # Register Method
+  RegisterMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref RegisterResource
+      RestApiId: !Ref APIGateway
+      HttpMethod: POST
+      AuthorizationType: NONE
+      RequestValidatorId: !Ref RequestValidator
+      
+      RequestModels:
+        application/json: !Ref RegisterModel
+
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  # Resource for /verify
+  VerifyResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref APIGateway
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: verify
+
+  # Verify Method
+  VerifyMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref VerifyResource
+      RestApiId: !Ref APIGateway
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestValidatorId: !Ref RequestValidator
+
+      RequestParameters:
+        method.request.querystring.token: true
+
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  # Resource for /unsubscribe
+  UnsubscribeResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref APIGateway
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: unsubscribe
+
+  # Unsubscribe Method
+  UnsubscribeMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref UnsubscribeResource
+      RestApiId: !Ref APIGateway
+      HttpMethod: GET
+      AuthorizationType: NONE
+      RequestValidatorId: !Ref RequestValidator
+
+      RequestParameters:
+        method.request.querystring.token: true
+
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations
+
+  # API Deployment
+  APIDeployment:
+    Type: AWS::ApiGateway::Deployment
+
+    DependsOn: 
+      - RegisterCORS
+      - RegisterMethod
+      - VerifyMethod
+      - UnsubscribeMethod
+      
+    Properties:
+      RestApiId: !Ref APIGateway
+      
+  # API Stage
+  APIStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: Prod
+      RestApiId: !Ref APIGateway
+      DeploymentId: !Ref APIDeployment
+
+  # API Gateway Permisson
+  APIGatewayPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref LambdaFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/Prod/*/*
+
+  # Scheduler Role
+  SchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+          - Effect: Allow
+
+            Principal: 
+              Service: 
+                scheduler.amazonaws.com
+
+            Action: sts:AssumeRole
+
+      Policies:
+        - PolicyName: Invoke_Lambda
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement: 
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt LambdaFunction.Arn
+
+  # Send Email Schedule
+  SendEmailSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: astronomy-sendemail-scheduler
+      ScheduleExpression: rate(5 minutes)
+      State: DISABLED
+
+      FlexibleTimeWindow: 
+        Mode: "OFF"
+      
+      Target: 
+        Arn: !GetAtt LambdaFunction.Arn
+        RoleArn: !GetAtt SchedulerRole.Arn
+        Input: '{ "send_news": "yes" }'
+
+  # Cleanup Schedule
+  CleanupSchedule:
+    Type: AWS::Scheduler::Schedule
+    Properties:
+      Name: astronomy-cleanup-scheduler
+      ScheduleExpression: rate(7 minutes)
+      State: DISABLED
+
+      FlexibleTimeWindow: 
+        Mode: "OFF"
+      
+      Target: 
+        Arn: !GetAtt LambdaFunction.Arn
+        RoleArn: !GetAtt SchedulerRole.Arn
+        Input: '{ "clean_up": "yes" }'
+
+# Outputs Resource URLs
+Outputs:
+  WEBSITEURL:
+    Description: URL for website hosted on S3
+    Value: !GetAtt S3Bucket.WebsiteURL
+
+  APIBASEURL:
+    Description: The base URL for the REST API gateway
+    Value: !Sub https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/Prod
+
+  DSQLENDPOINT:
+    Description: DSQL Endpoint 
+    Value: !Sub ${DSQLCluster}.dsql.${AWS::Region}.on.aws

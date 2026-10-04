@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Fun facts!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="intro">
+        <h2>An Error Occured</h2>
+        <p id="reason">Something went wrong, please try again later.</p>
+        <a href="index.html"> <button>Back</button> </a>
+    </div>
+    
+    <script>
+        const params = new URLSearchParams(document.location.search);
+        const reason = document.querySelector("#reason");
+        
+        if (params.get("noemail")) reason.textContent = "Your email isn't registered to our newsletter.";
+        else if (params.get("expired")) reason.textContent = "Verification link has expired, please re-register.";
+        else if (params.get("nopath")) reason.textContent = "An invalid path was provided";
+    </script>
+   
+</body>
+</html>

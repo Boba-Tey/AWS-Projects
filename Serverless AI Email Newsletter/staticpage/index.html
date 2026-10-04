@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Fun facts!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <form id="email_registration" class="intro">
+        <h2>Interested in Astronomy?</h2>
+        <label>Subscribe for fun and entertaining space facts!</label>
+        <input id="create_email" type="email" placeholder="example@gmail.com" required>
+        <button id="email_submit" type="submit">Submit!</button>
+    </form>   
+
+    <script>
+        const submit_button = document.querySelector("#email_submit");
+
+        document.querySelector("#email_registration").addEventListener("submit", event => {
+            event.preventDefault();
+            submit_button.disabled = true;
+            const base_url = "";
+            
+            fetch(`${base_url}/register`, {
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ create_email: document.querySelector("#create_email").value })
+            })
+
+            .then(response => response.json())
+            .then(data => { 
+                if (data.email) window.location.href = `confirm.html?email=${data.email}`; 
+                else if (data.outcome) alert(data.outcome);
+            })
+            .catch(err => console.error(err))
+            .finally(() => submit_button.disabled = false);
+        });
+    </script>
+
+</body>
+</html>

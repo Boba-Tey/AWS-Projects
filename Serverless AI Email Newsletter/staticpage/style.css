@@ -1,0 +1,61 @@
+body {
+    background-image: url("space.gif");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    margin: auto;
+}
+
+.intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 800px;
+    width: 90%;
+    padding: 10px;
+    gap: 20px;
+    
+    border-radius: 25px;
+    box-shadow: 10px 10px 25px rgb(0, 0, 0, 0.4);
+    background-color: rgba(241, 253, 255, 0.4);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 25px;
+}
+
+.intro h2, .intro p { margin: 0px; }
+
+.intro input {
+    max-width: 100%;
+    width: 400px;
+    font-size: 25px; 
+    border: 0px;
+    border-radius: 10px; 
+    box-shadow: 0px 2px 3px rgb(0, 0, 0, 0.4);
+}
+
+.intro button {
+    max-width: 100%;
+    width: 150px;
+    height: 30px;
+    border-radius: 5px; 
+    border: 0px;
+    background-color: rgb(83, 38, 134);
+    color: white;
+    font-size: 20px; 
+    box-shadow: 0px 2px 3px rgb(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: background-color 0.5s ease;
+    transition: transform 0.3s ease;
+}
+
+.intro button:hover {
+  background-color: #9745ce;
+  transform: scale(1.05);
+}
