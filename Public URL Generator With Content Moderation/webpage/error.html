@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Image URL Generator</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        <div class="main">
+            <h2><label>An Error Occured:</label></h2>
+            <p id="reason">Something went wrong, please try again later.</p>
+            <button class="fancy-button">Back</button>
+        </div>
+
+        <script>
+            document.querySelector(".fancy-button").addEventListener("click", () => {
+                window.location.href = "index.html";
+            });
+        </script>
+
+    </body>
+</html>

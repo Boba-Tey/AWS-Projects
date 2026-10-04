@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Image URL Generator</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        <form id="image-submit" class="main">
+            <h2><label>Choose An Image:</label></h2>
+
+            <input name="attach-image" type="file" accept=".jpg, .jpeg, .png, image/jpeg, image/png" style="display: none;">
+            <button id="image-button" type="button" class="input-button" onclick="attach_image.click()">Select Image</button>
+
+            <img src="" height="200" id="image-file" style="display: none;">
+            <button id="submit-button" type="submit" class="fancy-button">Generate Public URL</button>
+
+            <progress id="bar" max="100" value="0" style="display: none; width: 250px; height: 30px;"></progress>
+            <h3 id="result" style="display: none;">Some Result</h3>
+        </form>
+
+        <script>
+            const image_button = document.querySelector("#image-button");
+            const submit_button = document.querySelector("#submit-button");
+
+            const attach_image = document.querySelector("[name='attach-image']");
+            const image_file = document.querySelector("#image-file");
+
+            const progress_bar = document.querySelector("#bar");
+            const result = document.querySelector("#result");
+
+            let image_url = null;
+
+            const base_url = "API_URL";
+            function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+
+            attach_image.addEventListener("change", () => {
+                result.style.display = "none";
+                const allowed_types = ["image/jpeg", "image/png"];
+                const selected_image = attach_image.files[0];
+
+                if (!allowed_types.includes(selected_image.type)) {
+                    return alert("Only JPG or PNG Image Files Are Accepted");
+
+                } if (selected_image.size > 2 * 1024 * 1024) {
+                    return alert("Image cannot be larger than 2 MB");
+                }
+
+                if (image_url) URL.revokeObjectURL(image_url);
+
+                image_url = URL.createObjectURL(selected_image);
+                image_file.src = image_url;
+                image_file.style.display = "flex";
+            });
+
+            document.querySelector("#image-submit").addEventListener("submit", async (event) => {
+                event.preventDefault();
+                
+                result.style.display = "flex";
+                result.textContent = "Uploading....";
+
+                progress_bar.style.display = "flex";
+                progress_bar.value = 0;
+
+                submit_button.disabled = true;
+                image_button.disabled = true;
+
+                try {
+                    const file = attach_image.files[0];
+                    const extension = file.name.split(".").pop().toLowerCase();
+
+                    // Get Presigned URL
+                    const response = await fetch(`${base_url}/image_upload`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ file_extension: extension })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        window.location.href = "error.html";
+                        return;
+                    }
+
+                    // Upload To Verification S3 Bucket
+                    await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+
+                        xhr.upload.addEventListener("progress", event => { 
+                            progress_bar.value = Math.floor((event.loaded / event.total) * 100); 
+                        });
+
+                        xhr.addEventListener("load", () => {
+                            if (xhr.status !== 200) {
+                                return reject(new Error(`Upload failed with status: ${xhr.status}`));
+
+                            } resolve();
+                        });
+
+                        xhr.addEventListener("error", () => { 
+                            result.textContent = "Could not upload the image, please try again.";
+                            reject(new Error("Network connection failed"));
+                        });
+
+                        xhr.open("PUT", data.presigned_url, true);
+                        xhr.setRequestHeader("Content-Type", file.type);
+                        xhr.send(file);
+                    });
+
+                    progress_bar.style.display = "none";
+                    result.textContent = "Processing Image....."
+
+                    // Check Verification Status
+                    let count = 0;
+
+                    while (count < 3) {
+                        await delay(5000);
+
+                        const status_response = await fetch(
+                            `${base_url}/image_status?image_name=${encodeURIComponent(data.image_name)}`,
+                        );
+
+                        const status_data = await status_response.json();
+
+                        if (status_data.error) {
+                            window.location.href = "error.html";
+                            return;
+
+                        } else if (status_data.failed) {
+                            result.textContent = status_data.failed;
+                            return;
+
+                        } else if (status_data.pending) {
+                            count++;
+                            continue;
+                        }
+                            
+                        result.innerHTML = `<a href="${status_data.verified}" target="_blank">Image is verified. Click here for the URL</a>`;
+                        return; 
+                    }
+
+                    result.textContent = "Could not verify, please upload the image again, Make sure the file format is either JPG or PNG";
+                } 
+
+                catch (err) { console.error(err); } 
+
+                finally { 
+                    progress_bar.style.display = "none";
+                    submit_button.disabled = false; 
+                    image_button.disabled = false;
+                }
+            });
+        </script>
+
+    </body>
+</html>
